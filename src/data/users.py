@@ -11,6 +11,8 @@ class User(mongoengine.Document):
     language_code = mongoengine.StringField()
     block = mongoengine.BooleanField(default=False)
 
+    member_2019 = mongoengine.BooleanField()
+
     time_created = mongoengine.DateTimeField(default=datetime.utcnow)
     time_updated = mongoengine.DateTimeField(default=datetime.utcnow)
 

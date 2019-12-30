@@ -1,4 +1,4 @@
-from telegram import MessageEntity
+from telegram import MessageEntity, ChatMember, TelegramError
 
 
 def edit_message(update, context, text, **kwargs):
@@ -11,8 +11,12 @@ def edit_message(update, context, text, **kwargs):
 
 
 def reply_or_edit(update, context, text, **kwargs):
+    """
+        Вернёт сообщение и было ли оно отредактировано. Если нет - отправлено новое.
+    """
+
     if update.callback_query and update.message.text:
-        edit_message(update, context, text, **kwargs)
+        return edit_message(update, context, text, **kwargs), True
     else:
         with_reply = True
         for entity in update.effective_message.entities:
@@ -20,6 +24,18 @@ def reply_or_edit(update, context, text, **kwargs):
                 with_reply = False
 
         if with_reply:
-            update.message.reply_text(text, reply_to_message_id=update.message.message_id, **kwargs)
+            return update.message.reply_text(text, reply_to_message_id=update.message.message_id, **kwargs), False
         else:
-            update.message.reply_text(text, **kwargs)
+            return update.message.reply_text(text, **kwargs), False
+
+
+def is_channel_member(context, channel, user):
+    try:
+        chat_member = context.bot.get_chat_member(channel, user.telegram_id)
+
+        if chat_member.status not in [ChatMember.CREATOR, ChatMember.ADMINISTRATOR, ChatMember.MEMBER]:
+            return False
+    except TelegramError:
+        return False
+
+    return True

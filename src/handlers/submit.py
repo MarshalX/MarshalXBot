@@ -2,13 +2,11 @@ import os
 
 from mongoengine import get_db
 
-from telegram import ChatMember, TelegramError
-
-from decorators import provide_context
 from keyboards.do_action_keyboard import DoActionKeyboard
 from keyboards.main_keyboard import MainKeyboard
 
-from utils.helpers import reply_or_edit
+from utils.decorators import provide_context
+from utils.helpers import reply_or_edit, is_channel_member
 from utils.text_builder import TextBuilder
 
 
@@ -16,12 +14,7 @@ from utils.text_builder import TextBuilder
 def submit_handler(update, context):
     text = TextBuilder()
 
-    try:
-        chat_member = context.bot.get_chat_member(os.environ.get('CHANNEL'), context.user.telegram_id)
-
-        if chat_member.status not in [ChatMember.CREATOR, ChatMember.ADMINISTRATOR, ChatMember.MEMBER]:
-            raise TelegramError('not a sub user')
-    except TelegramError:
+    if not is_channel_member(context, os.environ.get('CHANNEL'), context.user):
         text.add(f'Ты не подписался на канал :)')
         reply_or_edit(update, context, text.get(), reply_markup=DoActionKeyboard().get(subscribe=True))
         return

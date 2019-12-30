@@ -1,10 +1,10 @@
 import html
 
-from decorators import provide_context
 from keyboards.main_keyboard import MainKeyboard
 
 from utils.helpers import reply_or_edit
 from utils.text_builder import TextBuilder
+from utils.decorators import provide_context
 
 
 @provide_context
